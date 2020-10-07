@@ -1,0 +1,8 @@
+pyspark==2.3.2
+numpy==1.19.2
+phonetics==1.0.5
+address-parser==1.0.0
+pycountry==20.7.3
+street-address==0.4.0
+six==1.15.0
+findspark==1.4.2

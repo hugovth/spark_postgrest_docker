@@ -1,0 +1,59 @@
+version: "3.1"
+
+services:
+  # https://github.com/suzel/docker-postgrest
+  postgrest:
+    build:
+      context: .
+      args:
+        POSTGREST_VERSION: "7.0.1"
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: postgres://app_user:secret@postgres:5432/app_db
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: app_user
+    links:
+      - postgres:postgres
+
+  # https://github.com/sosedoff/pgweb
+  pgweb:
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    links:
+      - postgres:postgres
+    environment:
+      - DATABASE_URL=postgres://app_user:secret@postgres:5432/app_db?sslmode=disable
+    depends_on:
+      - postgres
+
+  # https://hub.docker.com/_/postgres/
+  postgres:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      # - postgres-data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  web:
+    image: hugovth/postrest
+    command: python script.py
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    links:
+      - postgres:postgres
+    environment: 
+      - PG_JDBC_URL=jdbc:postgresql://postgres:5432/app_db
+      - PG_JDBC_USER=app_user
+      - PG_JDBC_PASS=secret
+
+volumes:
+  postgres-data: {}
