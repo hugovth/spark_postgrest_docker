@@ -1,4 +1,4 @@
-# posrest
+# postgrest
 
 ## Folder Structure
 
